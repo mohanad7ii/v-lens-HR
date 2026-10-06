@@ -22,6 +22,7 @@ window.VLensAPI = (() => {
     const text = await res.text();
     return text ? JSON.parse(text) : null;
   }
+  async function signUp(email,password,fullName){const data=await request('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password,data:{full_name:fullName||''}})});if(data.access_token){localStorage.setItem('vlens_access_token',data.access_token);localStorage.setItem('vlens_refresh_token',data.refresh_token);sessionStorage.setItem('vlens_demo','1')}return data}
   async function signIn(email,password){
     const data=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
     localStorage.setItem('vlens_access_token',data.access_token);
@@ -36,5 +37,5 @@ window.VLensAPI = (() => {
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  return {signIn,signOut,ensureSession,requireAuth,clearSession,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
+  return {signUp,signIn,signOut,ensureSession,requireAuth,clearSession,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
 })();
