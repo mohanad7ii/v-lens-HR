@@ -22,7 +22,13 @@ window.VLensAPI = (() => {
     const text = await res.text();
     return text ? JSON.parse(text) : null;
   }
-  async function signUp(email,password,fullName){const data=await request('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password,data:{full_name:fullName||''}})});if(data.access_token){localStorage.setItem('vlens_access_token',data.access_token);localStorage.setItem('vlens_refresh_token',data.refresh_token);sessionStorage.setItem('vlens_demo','1')}return data}
+  async function signUp(email,password,fullName){
+    const res=await fetch(url+'/auth/v1/signup',{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({email,password,data:{full_name:fullName||''}})});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){const msg=data.msg||data.message||data.error_description||data.error||('HTTP '+res.status);const err=new Error(msg);err.status=res.status;throw err}
+    if(data.access_token){localStorage.setItem('vlens_access_token',data.access_token);localStorage.setItem('vlens_refresh_token',data.refresh_token);sessionStorage.setItem('vlens_demo','1');try{await bootstrapProfile()}catch(e){}}
+    return data
+  }
   async function bootstrapProfile(){return request('/rest/v1/rpc/bootstrap_admin',{method:'POST',body:'{}'})}
   async function signIn(email,password){
     const data=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
