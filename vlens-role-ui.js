@@ -13,7 +13,7 @@ async function apply(){
   if(!p.canEvaluate){document.querySelectorAll('#evalForm button[type="submit"],.evaluation button,.interviewDecision').forEach(x=>disable(x,deny))}
   if(!p.canManageOffers){document.querySelectorAll('.offerAction,#offerForm button[type="submit"],button[onclick*="offer"],button[onclick*="Offer"]').forEach(x=>disable(x,deny))}
   if(!p.canDelete){document.querySelectorAll('.delete,.danger[data-action="delete"],button[onclick*="delete"],button[onclick*="Delete"]').forEach(x=>hide(x))}
-  if(!p.canManageTeam){document.querySelectorAll('button[id*="invite"],.invite,.inviteBtn,[data-action="invite"]').forEach(x=>disable(x,deny))}
+  if(!p.canManageTeam){document.querySelectorAll('button[id*="invite"],.invite,.inviteBtn,[data-action="invite"],.teamAdminAction').forEach(x=>disable(x,deny))}
   document.querySelectorAll('[data-role-label]').forEach(x=>x.textContent=p.role==='admin'?'مدير النظام':p.role==='manager'?'مدير إدارة':'أخصائي توظيف');
   if(p.role==='manager'){document.querySelectorAll('a[href="upload-cvs.html"]').forEach(x=>hide(x))}
   if(!p.canManageTeam&&location.pathname.endsWith('/team.html'))document.querySelectorAll('.invite,.inviteBtn,button').forEach(x=>{if(/دعوة|Invite/.test(x.textContent))disable(x,deny)});
