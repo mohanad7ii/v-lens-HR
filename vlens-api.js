@@ -12,6 +12,7 @@ window.VLensAPI = (() => {
   async function ensureSession(){if(tokenValid()){sessionStorage.setItem('vlens_demo','1');return true}return refreshSession()}
   async function requireAuth(){if(sessionStorage.getItem('vlens_offline_demo')==='1')return true;const ok=await ensureSession();if(!ok){location.replace('login.html');return false}return true}
   async function request(path, options = {}) {
+    if(path.startsWith('/rest/')||path.startsWith('/storage/')||path.startsWith('/functions/')){if(!(await ensureSession()))throw new Error('Authentication required')}
     const headers = Object.assign({
       apikey: key,
       Authorization: 'Bearer ' + (token() || key),
@@ -84,7 +85,7 @@ window.VLensAPI = (() => {
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,userId,isAuthenticated:()=>tokenValid()};
+  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,userId,isAuthenticated:()=>!!token()};
 })();
 /* Shared demo pipeline state */
 window.VLensPipeline=(()=>{
