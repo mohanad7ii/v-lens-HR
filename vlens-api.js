@@ -85,3 +85,14 @@ window.VLensAPI = (() => {
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
   return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
 })();
+/* Shared demo pipeline state */
+window.VLensPipeline=(()=>{
+  const labels={review:'قيد المراجعة',short:'قائمة مختصرة',interview:'مقابلة',offer:'عرض وظيفي',hired:'تم التوظيف',rejected:'مستبعد'};
+  function imported(){try{const a=JSON.parse(localStorage.getItem('vlens_demo_candidates')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+  function ids(){return Array.from({length:100},(_,i)=>String(i+1)).concat(imported().map((_,i)=>'demo-'+(i+1)))}
+  function get(id){try{return JSON.parse(localStorage.getItem('vlens_candidate_status_'+id)||'null')||{status:'review'}}catch(e){return{status:'review'}}}
+  function syncJob(id,status,job){job=job||localStorage.getItem('vlens_candidate_job_'+id);if(!job)return;const key='vlens_job_pipeline_'+encodeURIComponent(job);let p={};try{p=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}p[id]=status;localStorage.setItem(key,JSON.stringify(p))}
+  function set(id,status,meta={}){const rec={status,updated:new Date().toLocaleString('ar-SA'),...meta};localStorage.setItem('vlens_candidate_status_'+id,JSON.stringify(rec));syncJob(id,status,meta.job);window.dispatchEvent(new CustomEvent('vlens:pipeline',{detail:{id,status,record:rec}}));return rec}
+  function counts(){const out={review:0,short:0,interview:0,offer:0,hired:0,rejected:0,total:0};ids().forEach(id=>{const s=get(id).status||'review';if(out[s]===undefined)out.review++;else out[s]++;out.total++});return out}
+  return {labels,imported,ids,get,set,counts,syncJob};
+})();
