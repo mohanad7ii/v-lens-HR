@@ -4,6 +4,7 @@ window.VLensAPI = (() => {
   const key = 'sb_publishable_SAPZ0EARqPyMIRXeJqm-9A_Ktf_AdaA';
   const token=()=>localStorage.getItem('vlens_access_token')||'';
   const refreshToken=()=>localStorage.getItem('vlens_refresh_token')||'';
+  const userId=()=>{const p=decodeJwt(token());return p&&p.sub||null};
   function decodeJwt(t){try{return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))}catch(e){return null}}
   function tokenValid(){const p=decodeJwt(token());return !!(p&&p.exp&&p.exp*1000>Date.now()+30000)}
   function clearSession(){localStorage.removeItem('vlens_access_token');localStorage.removeItem('vlens_refresh_token');sessionStorage.removeItem('vlens_demo');sessionStorage.removeItem('vlens_offline_demo')}
@@ -83,7 +84,7 @@ window.VLensAPI = (() => {
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
+  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,userId,isAuthenticated:()=>tokenValid()};
 })();
 /* Shared demo pipeline state */
 window.VLensPipeline=(()=>{
