@@ -40,11 +40,21 @@ window.VLensAPI = (() => {
     return data;
   }
   function signOut(){clearSession();location.replace('login.html')}
+  async function uploadCV(file){
+    if(!(await ensureSession()))throw new Error('Authentication required');
+    const uid=(decodeJwt(token())||{}).sub;if(!uid)throw new Error('Authentication required');
+    const ext=(file.name.split('.').pop()||'pdf').toLowerCase();
+    const base=file.name.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,50)||'cv';
+    const path=uid+'/'+Date.now()+'-'+base+'.'+ext;
+    const res=await fetch(url+'/storage/v1/object/candidate-cvs/'+encodeURI(path),{method:'POST',headers:{apikey:key,Authorization:'Bearer '+token(),'Content-Type':file.type||'application/octet-stream','x-upsert':'false'},body:file});
+    if(!res.ok)throw new Error((await res.text())||('Upload failed '+res.status));
+    return {path,name:file.name,size:file.size,type:file.type};
+  }
   const listJobs=()=>request('/rest/v1/jobs?select=*&order=created_at.desc');
   const createJob=(job)=>request('/rest/v1/jobs',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(job)});
   const listCandidates=()=>request('/rest/v1/candidates?select=*&order=created_at.desc');
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
+  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
 })();
