@@ -50,11 +50,27 @@ window.VLensAPI = (() => {
     if(!res.ok)throw new Error((await res.text())||('Upload failed '+res.status));
     return {path,name:file.name,size:file.size,type:file.type};
   }
+  async function createCandidateFromCV(fileInfo, parsed={}){
+    const fallback=(fileInfo.name||'مرشح').replace(/\.(pdf|docx?|PDF|DOCX?)$/,'').replace(/[_-]+/g,' ').trim();
+    const payload={
+      full_name:parsed.full_name||fallback||'مرشح جديد',
+      email:parsed.email||null, phone:parsed.phone||null,
+      headline:parsed.headline||'مرشح من سيرة ذاتية',
+      education:parsed.education||null,
+      experience_years:Number(parsed.experience_years)||0,
+      skills:Array.isArray(parsed.skills)?parsed.skills:[],
+      languages:Array.isArray(parsed.languages)?parsed.languages:[],
+      certifications:Array.isArray(parsed.certifications)?parsed.certifications:[],
+      source:'cv_upload', cv_path:fileInfo.path, cv_text:parsed.cv_text||null
+    };
+    const rows=await request('/rest/v1/candidates',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(payload)});
+    return Array.isArray(rows)?rows[0]:rows;
+  }
   const listJobs=()=>request('/rest/v1/jobs?select=*&order=created_at.desc');
   const createJob=(job)=>request('/rest/v1/jobs',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(job)});
   const listCandidates=()=>request('/rest/v1/candidates?select=*&order=created_at.desc');
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
+  return {signUp,signIn,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,isAuthenticated:()=>!!token()};
 })();
