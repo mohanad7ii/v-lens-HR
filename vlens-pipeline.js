@@ -33,5 +33,5 @@
     window.dispatchEvent(new CustomEvent('vlens:pipeline',{detail:{id,status,record:rec}}));
     return rec;
   }
-  window.VLensPipeline={ids,get,counts,set};
+  window.VLensPipeline=Object.assign({},window.VLensPipeline||{},{ids,get,counts,set});
 })();
