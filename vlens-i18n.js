@@ -33,12 +33,12 @@ let originals=new WeakMap();
 function apply(){
  const en=(localStorage.getItem('vlens_lang')||'ar')==='en';
  document.documentElement.lang=en?'en':'ar';document.documentElement.dir=en?'ltr':'rtl';
- document.title=en?tr(document.title):document.title;
+ if(!document.documentElement.dataset.vlensOriginalTitle)document.documentElement.dataset.vlensOriginalTitle=document.title;document.title=en?tr(document.documentElement.dataset.vlensOriginalTitle):document.documentElement.dataset.vlensOriginalTitle;
  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
- while(n=w.nextNode()){if(!n.parentElement||['SCRIPT','STYLE','NOSCRIPT'].includes(n.parentElement.tagName))continue;if(!originals.has(n))originals.set(n,n.nodeValue);const o=originals.get(n);n.nodeValue=en?tr(o):o}
+ while(n=w.nextNode()){if(!n.parentElement||['SCRIPT','STYLE','NOSCRIPT'].includes(n.parentElement.tagName))continue;if(!originals.has(n))originals.set(n,n.nodeValue);let o=originals.get(n);if(n.nodeValue!==o&&n.nodeValue!==tr(o)){o=n.nodeValue;originals.set(n,o)}const translated=en?tr(o):o;if(n.nodeValue!==translated)n.nodeValue=translated}
  document.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el=>['placeholder','title','aria-label'].forEach(a=>{if(!el.hasAttribute(a))return;const k='vlOrig'+a.replace('-','');if(!el.dataset[k])el.dataset[k]=el.getAttribute(a);el.setAttribute(a,en?tr(el.dataset[k]):el.dataset[k])}));
  let b=document.getElementById('vlLang')||document.getElementById('vlensLangToggle')||document.getElementById('vlGlobalLang');
- if(b){b.textContent=en?'عربي':'EN';b.onclick=function(e){e.preventDefault();localStorage.setItem('vlens_lang',en?'ar':'en');location.reload()}}
+ if(b){b.textContent=en?'العربية 🌐':'English 🌐';b.setAttribute('aria-label',en?'Switch to Arabic':'التبديل إلى الإنجليزية');b.onclick=function(e){e.preventDefault();localStorage.setItem('vlens_lang',en?'ar':'en');location.reload()}}
 }
 let t;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(apply,25)}).observe(document.documentElement,{childList:true,subtree:true});
 document.addEventListener('DOMContentLoaded',apply);setTimeout(apply,50);setTimeout(apply,600);setTimeout(apply,1500);
