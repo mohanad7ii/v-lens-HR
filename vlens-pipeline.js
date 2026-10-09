@@ -20,7 +20,11 @@
     ids().forEach(id=>{const r=get(id),s=r&&c[r.status]!==undefined?r.status:'review';c[s]++;c.total++});
     return c;
   }
+  const VALID_STATUSES=new Set(['review','short','interview','offer','hired','rejected']);
   function set(id,status,meta){
+    id=String(id||'').trim();
+    if(!id)throw new Error('Candidate ID is required');
+    if(!VALID_STATUSES.has(status))throw new Error('Invalid candidate pipeline status: '+status);
     const previous=get(id)||{};
     const rec=Object.assign({},previous,meta||{},{status,updated:new Date().toLocaleString('ar-SA')});
     localStorage.setItem(PREFIX+id,JSON.stringify(rec));
