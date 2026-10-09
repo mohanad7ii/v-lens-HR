@@ -54,7 +54,7 @@ window.VLensAPI = (() => {
     return {path,name:file.name,size:file.size,type:file.type};
   }
   async function createCandidateFromCV(fileInfo, parsed={}){
-    const companyId=await requireCompany();
+    const companyId=await requireCreateRole();
     const fallback=(fileInfo.name||'مرشح').replace(/\.(pdf|docx?|PDF|DOCX?)$/,'').replace(/[_-]+/g,' ').trim();
     const payload={
       full_name:parsed.full_name||fallback||'مرشح جديد',
@@ -82,15 +82,16 @@ window.VLensAPI = (() => {
   async function scoreApplication(applicationId){return request('/rest/v1/rpc/score_application',{method:'POST',body:JSON.stringify({p_application_id:applicationId})})}
   async function getMyProfile(){const u=userId();if(!u)return null;const rows=await request('/rest/v1/profiles?id=eq.'+encodeURIComponent(u)+'&select=id,full_name,role,is_active,company_id&limit=1');return rows&&rows[0]||null}
   async function requireCompany(){const p=await getMyProfile();if(!p||p.is_active!==true||!p.company_id)throw new Error('Your account must be active and linked to a company before adding records. / يجب تفعيل حسابك وربطه بشركة قبل إضافة السجلات.');return p.company_id}
+  async function requireCreateRole(){const p=await getMyProfile();if(!p||p.is_active!==true||!p.company_id)throw new Error('يجب تفعيل الحساب وربطه بشركة قبل إضافة السجلات. / Active company membership required.');if(!['admin','recruiter'].includes(p.role))throw new Error('ليس لديك صلاحية إنشاء هذا السجل. / Permission denied.');return p.company_id}
   async function getPermissions(){const p=await getMyProfile();const role=p&&p.is_active!==false&&p.role?p.role:'viewer';return {profile:p,role,canManageJobs:['admin','recruiter'].includes(role),canManageCandidates:['admin','recruiter'].includes(role),canEvaluate:['admin','recruiter','manager'].includes(role),canManageOffers:['admin','recruiter','manager'].includes(role),canDelete:role==='admin',canManageTeam:role==='admin'}}
   const listJobs=()=>request('/rest/v1/jobs?select=*&order=created_at.desc');
-  const createJob=async(job)=>{const companyId=await requireCompany();return request('/rest/v1/jobs',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...job,company_id:companyId})})};
+  const createJob=async(job)=>{const companyId=await requireCreateRole();return request('/rest/v1/jobs',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...job,company_id:companyId})})};
   const listCandidates=()=>request('/rest/v1/candidates?select=*&order=created_at.desc');
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  const createInterview=async(interview)=>{const companyId=await requireCompany();return request('/rest/v1/interviews',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...interview,company_id:companyId})})};
-  const createOffer=async(offer)=>{const companyId=await requireCompany();return request('/rest/v1/offers',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...offer,company_id:companyId})})};
+  const createInterview=async(interview)=>{const companyId=await requireCreateRole();return request('/rest/v1/interviews',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...interview,company_id:companyId})})};
+  const createOffer=async(offer)=>{const companyId=await requireCreateRole();return request('/rest/v1/offers',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...offer,company_id:companyId})})};
   return {signUp,signIn,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,createInterview,listOffers,createOffer,request,userId,isAuthenticated:()=>tokenValid()};
 })();
 /* Shared demo pipeline state */
