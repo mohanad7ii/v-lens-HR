@@ -55,3 +55,51 @@ function init(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+
+/* V-Lens HR unified enterprise design system — all authenticated workspace pages */
+(function(){
+ function mountEnterpriseTheme(){
+  if(document.getElementById('vlens-enterprise-global'))return;
+  const css=document.createElement('style');css.id='vlens-enterprise-global';
+  css.textContent=`
+  :root{--vl-brand:#155cf4;--vl-brand-dark:#1048cc;--vl-ink:#122346;--vl-muted:#73839c;--vl-border:#e3eaf5;--vl-surface:#fff;--vl-canvas:#f3f7ff}
+  html{scroll-behavior:smooth}
+  body{font-family:"Segoe UI",Tahoma,Arial,sans-serif!important;background:var(--vl-canvas)!important;color:var(--vl-ink)!important}
+  body .main{min-width:0!important}
+  body .content{max-width:1600px!important;margin-inline:auto!important}
+  body .side[data-vlens-modern]{background:linear-gradient(170deg,#08162d,#0b1d3b 68%,#07152d)!important;border-inline-start:1px solid #ffffff14!important}
+  body .side[data-vlens-modern] .brand b{font-size:19px!important;letter-spacing:0!important}
+  body .side[data-vlens-modern] .brand small{color:#aebfdf!important;font-size:9px!important}
+  body .side[data-vlens-modern] .logo{background:linear-gradient(140deg,#378bff,#1749e6)!important}
+  body .side[data-vlens-modern] .nav a{border-radius:10px!important;min-height:47px!important}
+  body .side[data-vlens-modern] .nav a.active,body .side[data-vlens-modern] .nav a[aria-current=page]{background:linear-gradient(105deg,#2345c5,#1264fa)!important;box-shadow:0 7px 18px #0746b055!important}
+  body .top{background:#fff!important;border-bottom:1px solid var(--vl-border)!important;box-shadow:0 2px 16px #173c7310!important}
+  body .top .search,body input[type=search]{background:#f4f7fc!important;border:1px solid #dce5f2!important;border-radius:10px!important}
+  body .card,body .panel,body .stat,body .jobCard,body .candidateCard,body .offer,body .table,body .tools{background-color:#fff;border:1px solid var(--vl-border)!important;border-radius:13px!important;box-shadow:0 3px 17px #173b7010!important}
+  body .card:hover,body .panel:hover{border-color:#d4dff0!important}
+  body .stat b{color:#10234a!important}
+  body .stat span,body .muted{color:var(--vl-muted)!important}
+  body .icon,body .quickIcon{background:#eaf1ff!important;color:var(--vl-brand)!important;border-radius:11px!important}
+  body a.add,body .btn.primary,body button.primary,body .submit,body .saveBtn{background:linear-gradient(115deg,#155cf4,#286bff)!important;color:#fff!important;border-radius:10px!important;border-color:transparent!important}
+  body button,body a.btn{transition:background .18s,box-shadow .18s,transform .18s}
+  body button:focus-visible,body a:focus-visible,body input:focus-visible,body select:focus-visible,body textarea:focus-visible{outline:2px solid #2b69f5!important;outline-offset:2px!important}
+  body input:not([type=checkbox]):not([type=radio]),body select,body textarea{border-radius:10px;border-color:#dce5f2}
+  body table{border-collapse:separate;border-spacing:0}
+  body th,body thead{background:#f7f9fd!important;color:#61718c!important}
+  body td,body th{border-bottom-color:#eaf0f7!important}
+  body .badge,body .pill{border-radius:999px!important}
+  body .sectionTitle a,body .viewAll{color:var(--vl-brand)!important}
+  body .hero{border:1px solid #dce7fa!important;border-radius:16px!important}
+  body .vlens-side-footer button{border-radius:9px!important}
+  @media(min-width:701px){body .app{grid-template-columns:252px minmax(0,1fr)!important}body .content{padding-inline:24px!important}body .top{min-height:68px!important}}
+  @media(max-width:1000px) and (min-width:701px){body .app{grid-template-columns:225px minmax(0,1fr)!important}body .content{padding-inline:16px!important}}
+  @media(max-width:700px){body .content{padding-inline:12px!important}body .card,body .panel{max-width:100%}body .side[data-vlens-modern]{max-width:90vw}}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}body button,body a.btn{transition:none}}
+  `;
+  document.head.appendChild(css);
+  const side=document.querySelector('aside.side .brand small');
+  if(side)side.textContent='Smarter Hiring. Stronger Teams.';
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountEnterpriseTheme);
+ else mountEnterpriseTheme();
+})();
