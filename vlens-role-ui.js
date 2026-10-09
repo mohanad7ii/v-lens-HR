@@ -114,3 +114,83 @@ body.vlens-soft-mode .card,body.vlens-soft-mode .panel,body.vlens-soft-mode .sta
 body.vlens-soft-mode input,body.vlens-soft-mode select,body.vlens-soft-mode textarea{background:#fff!important}
 body.vlens-soft-mode .hero{border-color:#c9d8f2!important}
 `;document.head.appendChild(el)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()})();
+
+/* Responsive enterprise layout: tablets, phones and wide data tables */
+(function(){
+ function init(){
+  if(document.getElementById('vlens-responsive-20261009'))return;
+  const style=document.createElement('style');
+  style.id='vlens-responsive-20261009';
+  style.textContent=`
+  html,body{max-width:100%;overflow-x:clip}
+  .app,.main,.content{min-width:0}
+  .main{max-width:100%}
+  .content .grid,.content .lower,.content .stats,.content .execGrid,.content .quickGrid{min-width:0}
+  .content .grid>*,.content .lower>*,.content .stats>*,.content .execGrid>*,.content .quickGrid>*{min-width:0}
+  .panel,.card,.tools{max-width:100%}
+  .panel table,.card table,.tools table{width:100%}
+  .table, .tableWrap, .table-wrapper, .tableContainer, .table-responsive{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  .table table, .tableWrap table, .table-wrapper table, .tableContainer table, .table-responsive table{min-width:620px}
+  img,video,canvas,svg{max-width:100%}
+  .top{min-width:0}
+  .top .search{min-width:0}
+  @media(min-width:701px) and (max-width:900px){
+   body .app{display:block!important;grid-template-columns:minmax(0,1fr)!important}
+   body .main{margin:0!important;width:100%!important}
+   body .top{padding-inline-start:65px!important}
+   body .content{padding:18px!important}
+   body .side[data-vlens-modern]{width:270px!important}
+   body .vlens-side-toggle{display:block!important}
+  }
+  @media(max-width:700px){
+   body .app{display:block!important;grid-template-columns:1fr!important}
+   body .main{width:100%!important;min-width:0!important}
+   body .content{padding:12px!important}
+   body .top{padding-inline-start:60px!important;gap:8px!important}
+   body .top .search{flex:1 1 140px!important;width:auto!important}
+   body .side[data-vlens-modern]{display:flex!important;position:fixed!important;top:0!important;right:0!important;left:auto!important;bottom:0!important;width:min(290px,88vw)!important;height:100dvh!important;transform:translateX(110%)!important;overflow-y:auto!important;z-index:1001!important;box-shadow:-14px 0 40px #06152a44!important}
+   body .side[data-vlens-modern].vlens-open{transform:translateX(0)!important}
+   body .side[data-vlens-modern] .nav{display:flex!important;flex-direction:column!important;width:100%!important;min-width:0!important;gap:5px!important}
+   body .side[data-vlens-modern] .nav a{flex-direction:row!important;justify-content:flex-start!important;align-items:center!important;width:100%!important;min-width:0!important;height:auto!important;min-height:46px!important;padding:10px 12px!important;font-size:12px!important;white-space:normal!important}
+   body .side[data-vlens-modern] .brand{display:flex!important}
+   body .side[data-vlens-modern] .aiSide{display:block!important}
+   body .side[data-vlens-modern] .vlens-side-footer{display:flex!important}
+   body .vlens-side-toggle{display:block!important;z-index:1003!important;top:11px!important;right:11px!important}
+   body .vlens-side-backdrop.vlens-open{z-index:1000!important}
+   body .stats,body .execGrid,body .quickGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+   body .grid,body .lower{grid-template-columns:minmax(0,1fr)!important}
+   body .hero{flex-wrap:wrap!important}
+   body .hero h1{font-size:20px!important}
+   body .panel{padding:14px!important}
+   body .stat{padding:12px!important}
+   body .stat b{font-size:21px!important}
+  }
+  @media(max-width:390px){
+   body .stats,body .execGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+   body .quickGrid{grid-template-columns:1fr!important}
+   body .top{padding-inline-start:58px!important}
+  }
+  `;
+  document.head.appendChild(style);
+  const toggle=document.querySelector('.vlens-side-toggle');
+  const side=document.querySelector('aside.side');
+  if(toggle&&side){
+   toggle.setAttribute('aria-controls','vlens-workspace-navigation');
+   side.id='vlens-workspace-navigation';
+   toggle.setAttribute('aria-expanded',String(side.classList.contains('vlens-open')));
+   toggle.addEventListener('click',()=>toggle.setAttribute('aria-expanded',String(side.classList.contains('vlens-open'))));
+   document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&side.classList.contains('vlens-open')){
+     side.classList.remove('vlens-open');
+     document.querySelector('.vlens-side-backdrop')?.classList.remove('vlens-open');
+     toggle.setAttribute('aria-expanded','false');
+     toggle.focus();
+    }
+   });
+   side.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>toggle.setAttribute('aria-expanded','false')));
+   document.querySelector('.vlens-side-backdrop')?.addEventListener('click',()=>toggle.setAttribute('aria-expanded','false'));
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));
+ else setTimeout(init,0);
+})();
