@@ -87,12 +87,14 @@ window.VLensAPI = (() => {
   const listJobs=()=>request('/rest/v1/jobs?select=*&order=created_at.desc');
   const createJob=async(job)=>{const companyId=await requireCreateRole();return request('/rest/v1/jobs',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...job,company_id:companyId})})};
   const listCandidates=()=>request('/rest/v1/candidates?select=*&order=created_at.desc');
+  const createCandidate=async(candidate)=>{const companyId=await requireCreateRole();return request('/rest/v1/candidates',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...candidate,company_id:companyId})})};
+
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
   const createInterview=async(interview)=>{const companyId=await requireCreateRole();return request('/rest/v1/interviews',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...interview,company_id:companyId})})};
   const createOffer=async(offer)=>{const companyId=await requireCreateRole();return request('/rest/v1/offers',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...offer,company_id:companyId})})};
-  return {signUp,signIn,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,createInterview,listOffers,createOffer,request,userId,isAuthenticated:()=>tokenValid()};
+  return {signUp,signIn,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,createCandidate,listApplications,listInterviews,createInterview,listOffers,createOffer,request,userId,isAuthenticated:()=>tokenValid()};
 })();
 /* Shared demo pipeline state */
 window.VLensPipeline=(()=>{
