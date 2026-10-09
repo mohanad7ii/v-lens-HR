@@ -88,8 +88,8 @@ function renderInterviewLive(){
   short.forEach(id=>{
    const x=demoCandidateInfo(id),line=document.createElement('div');line.className='score';
    const label=document.createElement('span');label.textContent=x.name+' · '+x.role;
-   const btn=document.createElement('button');btn.type='button';btn.textContent='نقل إلى المقابلة';
-   btn.addEventListener('click',()=>{VLensPipeline.set(id,'interview',{source:'shortlist'});renderInterviewLive()});
+   const btn=document.createElement('button');btn.type='button';btn.textContent='جدولة مقابلة';
+   btn.addEventListener('click',()=>{const url=new URL('candidate.html',location.href);url.searchParams.set('id',String(id));url.searchParams.set('name',x.name);url.searchParams.set('role',x.role);location.href=url.toString()});
    line.append(label,btn);ready.appendChild(line);
   });
   active.forEach(id=>{
