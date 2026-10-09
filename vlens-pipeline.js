@@ -21,9 +21,10 @@
     return c;
   }
   function set(id,status,meta){
-    const rec=Object.assign({status,updated:new Date().toLocaleString('ar-SA')},meta||{});
+    const previous=get(id)||{};
+    const rec=Object.assign({},previous,meta||{},{status,updated:new Date().toLocaleString('ar-SA')});
     localStorage.setItem(PREFIX+id,JSON.stringify(rec));
-    const job=(meta&&meta.job)||localStorage.getItem('vlens_candidate_job_'+id);
+    const job=(meta&&meta.job)||previous.job||localStorage.getItem('vlens_candidate_job_'+id);
     if(job){
       localStorage.setItem('vlens_candidate_job_'+id,job);
       const key='vlens_job_pipeline_'+encodeURIComponent(job);let p={};
