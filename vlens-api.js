@@ -80,7 +80,7 @@ window.VLensAPI = (() => {
   async function calculateMatch(candidateId,jobId){return request('/rest/v1/rpc/calculate_match_score',{method:'POST',body:JSON.stringify({p_candidate_id:candidateId,p_job_id:jobId})})}
   async function scoreApplication(applicationId){return request('/rest/v1/rpc/score_application',{method:'POST',body:JSON.stringify({p_application_id:applicationId})})}
   async function getMyProfile(){const u=userId();if(!u)return null;const rows=await request('/rest/v1/profiles?id=eq.'+encodeURIComponent(u)+'&select=id,full_name,role,is_active&limit=1');return rows&&rows[0]||null}
-  async function getPermissions(){const p=await getMyProfile();const role=p&&p.role||'recruiter';return {profile:p,role,canManageJobs:['admin','recruiter'].includes(role),canManageCandidates:['admin','recruiter'].includes(role),canEvaluate:['admin','recruiter','manager'].includes(role),canManageOffers:['admin','recruiter','manager'].includes(role),canDelete:role==='admin',canManageTeam:role==='admin'}}
+  async function getPermissions(){const p=await getMyProfile();const role=p&&p.is_active!==false&&p.role?p.role:'viewer';return {profile:p,role,canManageJobs:['admin','recruiter'].includes(role),canManageCandidates:['admin','recruiter'].includes(role),canEvaluate:['admin','recruiter','manager'].includes(role),canManageOffers:['admin','recruiter','manager'].includes(role),canDelete:role==='admin',canManageTeam:role==='admin'}}
   const listJobs=()=>request('/rest/v1/jobs?select=*&order=created_at.desc');
   const createJob=(job)=>request('/rest/v1/jobs',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(job)});
   const listCandidates=()=>request('/rest/v1/candidates?select=*&order=created_at.desc');
