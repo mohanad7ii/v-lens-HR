@@ -87,7 +87,7 @@ window.VLensAPI = (() => {
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  return {signUp,signIn,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,userId,isAuthenticated:()=>!!token()};
+  return {signUp,signIn,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,listApplications,listInterviews,listOffers,request,userId,isAuthenticated:()=>tokenValid()};
 })();
 /* Shared demo pipeline state */
 window.VLensPipeline=(()=>{
