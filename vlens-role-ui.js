@@ -11,7 +11,7 @@ async function apply(){
   if(!p.canManageJobs){document.querySelectorAll('a.add[href*="jobs"],button[data-action="add-job"],#addJob,.newJob,.createJob').forEach(x=>disable(x,deny))}
   if(!p.canManageCandidates){document.querySelectorAll('a.add[href*="upload"],button[data-action="upload"],#uploadBtn,.uploadBtn,.addCandidate').forEach(x=>disable(x,deny))}
   if(!p.canEvaluate){document.querySelectorAll('#evalForm button[type="submit"],.evaluation button,.interviewDecision').forEach(x=>disable(x,deny))}
-  if(!p.canManageOffers){document.querySelectorAll('.offerAction,#offerForm button[type="submit"],button[onclick*="offer"],button[onclick*="Offer"]').forEach(x=>disable(x,deny))}
+  if(!['admin','recruiter'].includes(p.role)){document.querySelectorAll('.offerAction,#offerForm button[type="submit"],#createOfferForm button[type="submit"],#interviewForm button[type="submit"],.interviewSave,button[onclick*="offer"],button[onclick*="Offer"]').forEach(x=>disable(x,deny))}
   if(!p.canDelete){document.querySelectorAll('.delete,.danger[data-action="delete"],button[onclick*="delete"],button[onclick*="Delete"]').forEach(x=>hide(x))}
   if(!p.canManageTeam){document.querySelectorAll('button[id*="invite"],.invite,.inviteBtn,[data-action="invite"],.teamAdminAction').forEach(x=>disable(x,deny))}
   document.querySelectorAll('[data-role-label]').forEach(x=>x.textContent=p.role==='admin'?'مدير النظام':p.role==='manager'?'مدير إدارة':'أخصائي توظيف');
