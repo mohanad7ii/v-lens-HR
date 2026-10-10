@@ -94,16 +94,16 @@ async function setupCandidateJobChooser(){
  try{
   const id=new URLSearchParams(location.search).get('id');
   const apps=await VLensAPI.request('/rest/v1/applications?candidate_id=eq.'+encodeURIComponent(id)+'&select=id,job_id&limit=100');
-  if(!Array.isArray(apps)||apps.length<2)return;
+  if(!Array.isArray(apps)||!apps.length)return;
   const ids=[...new Set(apps.map(a=>a.job_id).filter(Boolean))];
   const jobs=await VLensAPI.request('/rest/v1/jobs?id=in.('+ids.map(encodeURIComponent).join(',')+')&select=id,title');
   const titles=new Map((Array.isArray(jobs)?jobs:[]).map(j=>[String(j.id),j.title]));
-  select.add(new Option('اختر وظيفة للتقييم',''));
+  const currentTitle=document.createElement('div');currentTitle.id='selectedCandidateJob';currentTitle.style.cssText='margin-bottom:8px;font-weight:700';holder.insertBefore(currentTitle,label);select.add(new Option('اختر وظيفة للتقييم',''));
   ids.forEach(jobId=>select.add(new Option(titles.get(String(jobId))||'وظيفة '+String(jobId).slice(0,8),jobId)));
   const current=new URLSearchParams(location.search).get('job_id');
-  if(current&&ids.some(id=>String(id)===current))select.value=current;
+  if(current&&ids.some(id=>String(id)===current))select.value=current;else if(apps.length===1&&ids.length===1)select.value=String(ids[0]);currentTitle.textContent=select.value?'التقييم مرتبط بوظيفة: '+(titles.get(select.value)||'وظيفة '+select.value.slice(0,8)):'اختر الوظيفة قبل عرض تقييم مرتبط بطلب محدد';
   select.addEventListener('change',()=>{const url=new URL(location.href);if(select.value)url.searchParams.set('job_id',select.value);else url.searchParams.delete('job_id');location.assign(url.toString())});
-  holder.hidden=false;
+  holder.hidden=false;select.hidden=apps.length===1;
  }catch(e){console.warn('Unable to list candidate jobs',e)}
 }
 setupCandidateJobChooser();
