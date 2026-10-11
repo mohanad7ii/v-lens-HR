@@ -98,7 +98,13 @@ async function saveDecision(d){
    if(!Array.isArray(updated)||updated.length!==1||updated[0].stage!==dbStage)throw new Error('Application stage update not confirmed');
   }catch(e){
    console.warn('Backend evaluation save failed',e);
-   toast.textContent='تعذر إكمال الحفظ في قاعدة البيانات؛ لم يتم تأكيد القرار. أعد المحاولة أو تحقق من سجل التقييمات.';
+   const raw=String(e&&e.message||e||'');
+   let message='تعذر تأكيد الحفظ. تحقق من الاتصال ثم أعد المحاولة؛ تقييمك وملاحظاتك ما زالت محفوظة محليًا.';
+   if(/401|JWT expired|Authentication required|invalid.*token/i.test(raw))message='انتهت جلسة الدخول أو تعذر التحقق منها. سجّل الدخول مجددًا ثم أعد حفظ القرار؛ تقييمك وملاحظاتك محفوظة محليًا.';
+   else if(/403|42501|permission denied|row.level.security|policy/i.test(raw))message='لا تملك صلاحية حفظ هذا التقييم أو تحديث الطلب. تواصل مع مسؤول النظام؛ تقييمك وملاحظاتك محفوظة محليًا.';
+   else if(/Missing selected interview|Active company profile required/i.test(raw))message='تعذر تحديد مقابلة حقيقية مرتبطة بحساب شركة نشط. حدّث الصفحة واختر المقابلة من جديد.';
+   else if(/Evaluation write not confirmed|Application stage update not confirmed/i.test(raw))message='لم تؤكد قاعدة البيانات اكتمال جميع التحديثات. راجع سجل التقييمات قبل إعادة المحاولة لتجنب اختلاف حالة الطلب.';
+   toast.textContent=message;
    saveDecision.busy=false;
    return;
   }
