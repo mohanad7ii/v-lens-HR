@@ -65,7 +65,7 @@ window.VLensAPI = (() => {
       skills:Array.isArray(parsed.skills)?parsed.skills:[],
       languages:Array.isArray(parsed.languages)?parsed.languages:[],
       certifications:Array.isArray(parsed.certifications)?parsed.certifications:[],
-      source:'cv_upload', cv_path:fileInfo.path, cv_text:parsed.cv_text||null
+      source:'cv_upload', cv_path:fileInfo.path, cv_text:parsed.cv_text||null, company_id:companyId
     };
     const rows=await request('/rest/v1/candidates',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(payload)});
     return Array.isArray(rows)?rows[0]:rows;
@@ -95,15 +95,4 @@ window.VLensAPI = (() => {
   const createInterview=async(interview)=>{const companyId=await requireCreateRole();const result=await request('/rest/v1/interviews',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...interview,company_id:companyId})});if(!Array.isArray(result)||result.length!==1||!result[0]?.id)throw new Error('لم تؤكد قاعدة البيانات إنشاء المقابلة');return result[0]};
   const createOffer=async(offer)=>{const companyId=await requireCreateRole();const result=await request('/rest/v1/offers',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...offer,company_id:companyId})});if(!Array.isArray(result)||result.length!==1||!result[0]?.id)throw new Error('لم تؤكد قاعدة البيانات إنشاء العرض الوظيفي');return result[0]};
   return {signUp,signIn,resetPassword,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,createCandidate,listApplications,listInterviews,createInterview,listOffers,createOffer,request,userId,isAuthenticated:()=>tokenValid()};
-})();
-/* Shared demo pipeline state */
-window.VLensPipeline=(()=>{
-  const labels={review:'قيد المراجعة',short:'قائمة مختصرة',interview:'مقابلة',offer:'عرض وظيفي',hired:'تم التوظيف',rejected:'مستبعد'};
-  function imported(){try{const a=JSON.parse(localStorage.getItem('vlens_demo_candidates')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
-  function ids(){return Array.from({length:100},(_,i)=>String(i+1)).concat(imported().map((_,i)=>'demo-'+(i+1)))}
-  function get(id){try{return JSON.parse(localStorage.getItem('vlens_candidate_status_'+id)||'null')||{status:'review'}}catch(e){return{status:'review'}}}
-  function syncJob(id,status,job){job=job||localStorage.getItem('vlens_candidate_job_'+id);if(!job)return;const key='vlens_job_pipeline_'+encodeURIComponent(job);let p={};try{p=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}p[id]=status;localStorage.setItem(key,JSON.stringify(p))}
-  function set(id,status,meta={}){const rec={status,updated:new Date().toLocaleString('ar-SA'),...meta};localStorage.setItem('vlens_candidate_status_'+id,JSON.stringify(rec));syncJob(id,status,meta.job);window.dispatchEvent(new CustomEvent('vlens:pipeline',{detail:{id,status,record:rec}}));return rec}
-  function counts(){const out={review:0,short:0,interview:0,offer:0,hired:0,rejected:0,total:0};ids().forEach(id=>{const s=get(id).status||'review';if(out[s]===undefined)out.review++;else out[s]++;out.total++});return out}
-  return {labels,imported,ids,get,set,counts,syncJob};
 })();
