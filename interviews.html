@@ -92,8 +92,18 @@ async function retryPendingStageSync(){
  const button=document.getElementById('retryStageBtn');
  retryPendingStageSync.busy=true;if(button){button.disabled=true;button.textContent='جارٍ تحديث المرحلة…'}
  try{
-  const updated=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({stage})});
-  if(!Array.isArray(updated)||updated.length!==1||updated[0].stage!==stage)throw new Error('Application stage update not confirmed');
+  const rows=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId)+'&select=id,stage&limit=1');
+  if(!Array.isArray(rows)||rows.length!==1)throw new Error('Application unavailable or access denied');
+  const currentStage=rows[0].stage;
+  // Never roll back a stage changed by another recruiter. Require an atomic match.
+  if(currentStage!==stage&&!['interview'].includes(currentStage)){
+   if(evalKey()===key)toast.textContent='تغيّرت مرحلة الطلب إلى '+currentStage+' بواسطة عملية أخرى. لم نغيّرها؛ راجع الطلب قبل إعادة المحاولة.';
+   return;
+  }
+  if(currentStage!==stage){
+   const updated=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId)+'&stage=eq.'+encodeURIComponent(currentStage),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({stage})});
+   if(!Array.isArray(updated)||updated.length!==1||updated[0].stage!==stage)throw new Error('Application stage changed during retry');
+  }
   const latest=JSON.parse(localStorage.getItem(key)||'{}');
   if(latest.pending_stage_sync&&latest.pending_decision===decision&&latest.pending_application_id===appId){
    delete latest.pending_stage_sync;delete latest.pending_decision;delete latest.pending_application_id;
