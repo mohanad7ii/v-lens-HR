@@ -28,10 +28,10 @@ window.VLensAPI = (() => {
     const res=await fetch(url+'/auth/v1/signup?redirect_to='+encodeURIComponent('https://mohanad7ii.github.io/v-lens-HR/auth-callback.html'),{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({email,password,data:{full_name:fullName||'',company_name:companyName||''}})});
     const data=await res.json().catch(()=>({}));
     if(!res.ok){const msg=data.msg||data.message||data.error_description||data.error||('HTTP '+res.status);const err=new Error(msg);err.status=res.status;throw err}
-    if(data.access_token){localStorage.setItem('vlens_access_token',data.access_token);localStorage.setItem('vlens_refresh_token',data.refresh_token);sessionStorage.setItem('vlens_demo','1');await ensureWorkspace(companyName,fullName)}
+    if(data.access_token){sessionStorage.removeItem('vlens_offline_demo');localStorage.setItem('vlens_access_token',data.access_token);localStorage.setItem('vlens_refresh_token',data.refresh_token);sessionStorage.setItem('vlens_demo','1');await ensureWorkspace(companyName,fullName)}
     return data
   }
-  function consumeAuthCallback(){const p=new URLSearchParams(location.hash.slice(1));const access=p.get('access_token'),refresh=p.get('refresh_token'),type=p.get('type')||'';if(!access)return false;localStorage.setItem('vlens_access_token',access);if(refresh)localStorage.setItem('vlens_refresh_token',refresh);sessionStorage.setItem('vlens_demo','1');sessionStorage.setItem('vlens_auth_callback_type',type);history.replaceState(null,'',location.pathname);return true}
+  function consumeAuthCallback(){sessionStorage.removeItem('vlens_offline_demo');const p=new URLSearchParams(location.hash.slice(1));const access=p.get('access_token'),refresh=p.get('refresh_token'),type=p.get('type')||'';if(!access)return false;localStorage.setItem('vlens_access_token',access);if(refresh)localStorage.setItem('vlens_refresh_token',refresh);sessionStorage.setItem('vlens_demo','1');sessionStorage.setItem('vlens_auth_callback_type',type);history.replaceState(null,'',location.pathname);return true}
   async function ensureWorkspace(companyName,fullName){
     const profile=await getMyProfile();
     if(profile&&profile.company_id&&profile.is_active)return profile.company_id;
@@ -48,6 +48,7 @@ window.VLensAPI = (() => {
     const data=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
     localStorage.setItem('vlens_access_token',data.access_token);
     localStorage.setItem('vlens_refresh_token',data.refresh_token);
+    sessionStorage.removeItem('vlens_offline_demo');
     sessionStorage.setItem('vlens_demo','1');
     await ensureWorkspace()
     return data;
