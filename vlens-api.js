@@ -92,8 +92,8 @@ window.VLensAPI = (() => {
   const listApplications=()=>request('/rest/v1/applications?select=*&order=applied_at.desc');
   const listInterviews=()=>request('/rest/v1/interviews?select=*&order=scheduled_at.asc');
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
-  const createInterview=async(interview)=>{const companyId=await requireCreateRole();return request('/rest/v1/interviews',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...interview,company_id:companyId})})};
-  const createOffer=async(offer)=>{const companyId=await requireCreateRole();return request('/rest/v1/offers',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...offer,company_id:companyId})})};
+  const createInterview=async(interview)=>{const companyId=await requireCreateRole();const result=await request('/rest/v1/interviews',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...interview,company_id:companyId})});if(!Array.isArray(result)||result.length!==1||!result[0]?.id)throw new Error('لم تؤكد قاعدة البيانات إنشاء المقابلة');return result[0]};
+  const createOffer=async(offer)=>{const companyId=await requireCreateRole();const result=await request('/rest/v1/offers',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...offer,company_id:companyId})});if(!Array.isArray(result)||result.length!==1||!result[0]?.id)throw new Error('لم تؤكد قاعدة البيانات إنشاء العرض الوظيفي');return result[0]};
   return {signUp,signIn,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,createCandidate,listApplications,listInterviews,createInterview,listOffers,createOffer,request,userId,isAuthenticated:()=>tokenValid()};
 })();
 /* Shared demo pipeline state */
