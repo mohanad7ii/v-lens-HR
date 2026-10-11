@@ -19,7 +19,7 @@ window.VLensAPI = (() => {
       'Content-Type': 'application/json'
     }, options.headers || {});
     const res = await fetch(url + path, Object.assign({}, options, {headers}));
-    if (!res.ok) throw new Error((await res.text()) || ('HTTP ' + res.status));
+    if (!res.ok) { const raw=await res.text(); let message=raw||('HTTP '+res.status); try { const payload=JSON.parse(raw); message=payload.msg||payload.message||payload.error_description||payload.error||message; } catch (_) {} throw new Error(message); }
     if (res.status === 204) return null;
     const text = await res.text();
     return text ? JSON.parse(text) : null;
