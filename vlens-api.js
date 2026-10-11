@@ -25,7 +25,7 @@ window.VLensAPI = (() => {
     return text ? JSON.parse(text) : null;
   }
   async function signUp(email,password,fullName,companyName){
-    const res=await fetch(url+'/auth/v1/signup',{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({email,password,data:{full_name:fullName||'',company_name:companyName||''},gotrue_meta_security:{},redirect_to:'https://mohanad7ii.github.io/v-lens-HR/auth-callback.html'})});
+    const res=await fetch(url+'/auth/v1/signup?redirect_to='+encodeURIComponent('https://mohanad7ii.github.io/v-lens-HR/auth-callback.html'),{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({email,password,data:{full_name:fullName||'',company_name:companyName||''}})});
     const data=await res.json().catch(()=>({}));
     if(!res.ok){const msg=data.msg||data.message||data.error_description||data.error||('HTTP '+res.status);const err=new Error(msg);err.status=res.status;throw err}
     if(data.access_token){localStorage.setItem('vlens_access_token',data.access_token);localStorage.setItem('vlens_refresh_token',data.refresh_token);sessionStorage.setItem('vlens_demo','1');await ensureWorkspace(companyName,fullName)}
