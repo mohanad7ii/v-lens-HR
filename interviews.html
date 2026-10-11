@@ -77,12 +77,14 @@ async function saveDecision(d){
    const evaluatorId=VLensAPI.userId();
    if(!profile||!profile.company_id||!evaluatorId)throw new Error('Active company profile required');
    const payload={interview_id:interviewId,company_id:profile.company_id,evaluator_id:evaluatorId,communication:rec.r3||null,technical_knowledge:rec.r2||null,problem_solving:rec.r1||null,culture_fit:rec.r4||null,overall_score:overall,recommendation:d,notes:rec.notes||null};
-   // An interview may have multiple evaluators; only update the current evaluator's own record.
-   const existing=await VLensAPI.request('/rest/v1/evaluations?interview_id=eq.'+encodeURIComponent(interviewId)+'&evaluator_id=eq.'+encodeURIComponent(evaluatorId)+'&select=id&limit=1');
-   const previous=Array.isArray(existing)&&existing[0];
-   const evalPath=previous?'/rest/v1/evaluations?id=eq.'+encodeURIComponent(previous.id):'/rest/v1/evaluations';
-   const saved=await VLensAPI.request(evalPath,{method:previous?'PATCH':'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(previous?{communication:payload.communication,technical_knowledge:payload.technical_knowledge,problem_solving:payload.problem_solving,culture_fit:payload.culture_fit,overall_score:payload.overall_score,recommendation:payload.recommendation,notes:payload.notes}:payload)});
-   if(!Array.isArray(saved)||saved.length!==1||!saved[0].id)throw new Error('Evaluation write not confirmed');
+   // The database enforces one evaluation per interview and evaluator.
+   // Atomic upsert handles simultaneous saves without a select-then-insert race.
+   const saved=await VLensAPI.request('/rest/v1/evaluations?on_conflict=interview_id,evaluator_id',{
+    method:'POST',
+    headers:{Prefer:'resolution=merge-duplicates,return=representation'},
+    body:JSON.stringify(payload)
+   });
+   if(!Array.isArray(saved)||saved.length!==1||!saved[0].id)throw new Error('Evaluation upsert not confirmed');
    const dbStage=isAdvancing?'approval':d==='عدم الاستمرار'?'rejected':'interview';
    const updated=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({stage:dbStage})});
    if(!Array.isArray(updated)||updated.length!==1||updated[0].stage!==dbStage)throw new Error('Application stage update not confirmed');
