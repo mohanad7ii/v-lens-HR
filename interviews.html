@@ -160,13 +160,15 @@ async function saveDecision(d){
  if(isAdvancing&&!['r1','r2','r3','r4'].every(k=>Number.isInteger(Number(rec[k]))&&Number(rec[k])>=1&&Number(rec[k])<=5)){toast.textContent='أكمل تقييم المعايير الأربعة قبل نقل المرشح إلى العرض الوظيفي';return}
  const authenticated=!!(window.VLensAPI&&VLensAPI.isAuthenticated());
  let evaluationConfirmed=false;
+ let appId=null;
  if(authenticated){
   if(saveDecision.busy)return;
   saveDecision.busy=true;
   toast.textContent='جارٍ حفظ قرار المقابلة في قاعدة البيانات…';
   try{
    const opt=document.getElementById('evalCandidate').selectedOptions[0];
-   const appId=opt&&opt.dataset.application,interviewId=opt&&opt.dataset.interview;
+   appId=opt&&opt.dataset.application;
+   const interviewId=opt&&opt.dataset.interview;
    if(!appId||!interviewId)throw new Error('Missing selected interview or application');
    const vals=['r1','r2','r3','r4'].map(k=>Number(rec[k]));
    const overall=vals.every(v=>Number.isInteger(v)&&v>=1&&v<=5)?Math.round(vals.reduce((a,b)=>a+b,0)/4*20):null;
@@ -222,7 +224,7 @@ async function saveDecision(d){
  const currentKey=evalKey(),selectionChanged=currentKey!==decisionKey||document.getElementById('evalCandidate').value!==decisionSelection;
  const latest=(()=>{try{return JSON.parse(localStorage.getItem(decisionKey)||'{}')}catch(e){return{}}})();
  const changedDuringSave=authenticated&&latest.draft_updated_at!==rec.draft_updated_at;
- const persisted=changedDuringSave?{...latest,decision:d,backend_saved:true}:{...rec,decision:d,backend_saved:!!authenticated||rec.backend_saved};
+ const persisted=changedDuringSave?{...latest,decision:d,backend_saved:authenticated}:{...rec,decision:d,backend_saved:authenticated};
  if(!changedDuringSave)delete persisted.draft_updated_at;
  delete persisted.pending_stage_sync;delete persisted.pending_decision;delete persisted.pending_application_id;
  persisted.updated=new Date().toLocaleString('ar-SA');
