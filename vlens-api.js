@@ -43,7 +43,8 @@ window.VLensAPI = (() => {
   }
   async function bootstrapProfile(){return request('/rest/v1/rpc/bootstrap_admin',{method:'POST',body:'{}'})}
   async function updatePassword(password){if(!(await ensureSession()))throw new Error('Authentication required');if(!password||password.length<8)throw new Error('Password must be at least 8 characters');return request('/auth/v1/user',{method:'PUT',body:JSON.stringify({password})})}
-  async function resetPassword(email){const res=await fetch(url+'/auth/v1/recover?redirect_to='+encodeURIComponent('https://mohanad7ii.github.io/v-lens-HR/auth-callback.html'),{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({email})});if(!res.ok){const payload=await res.json().catch(()=>({}));const err=new Error(payload.msg||payload.message||payload.error_description||payload.error||'Recovery request failed');err.status=res.status;throw err}return true}\n  async function signIn(email,password){
+  async function resetPassword(email){const res=await fetch(url+'/auth/v1/recover?redirect_to='+encodeURIComponent('https://mohanad7ii.github.io/v-lens-HR/auth-callback.html'),{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({email})});if(!res.ok){const payload=await res.json().catch(()=>({}));const err=new Error(payload.msg||payload.message||payload.error_description||payload.error||'Recovery request failed');err.status=res.status;throw err}return true}
+  async function signIn(email,password){
     const data=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
     localStorage.setItem('vlens_access_token',data.access_token);
     localStorage.setItem('vlens_refresh_token',data.refresh_token);
