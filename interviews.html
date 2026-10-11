@@ -73,9 +73,16 @@ async function saveDecision(d){
    if(!appId||!interviewId)throw new Error('Missing selected interview or application');
    const vals=['r1','r2','r3','r4'].map(k=>Number(rec[k]));
    const overall=vals.every(v=>Number.isInteger(v)&&v>=1&&v<=5)?Math.round(vals.reduce((a,b)=>a+b,0)/4*20):null;
-   await VLensAPI.request('/rest/v1/evaluations',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({interview_id:interviewId,communication:rec.r3||null,technical_knowledge:rec.r2||null,problem_solving:rec.r1||null,culture_fit:rec.r4||null,overall_score:overall,recommendation:d,notes:rec.notes||null})});
+   const payload={interview_id:interviewId,communication:rec.r3||null,technical_knowledge:rec.r2||null,problem_solving:rec.r1||null,culture_fit:rec.r4||null,overall_score:overall,recommendation:d,notes:rec.notes||null};
+   // Reuse the existing evaluation on retries, including after a partial application-stage failure.
+   const existing=await VLensAPI.request('/rest/v1/evaluations?interview_id=eq.'+encodeURIComponent(interviewId)+'&select=id&order=created_at.desc&limit=1');
+   const previous=Array.isArray(existing)&&existing[0];
+   const evalPath=previous?'/rest/v1/evaluations?id=eq.'+encodeURIComponent(previous.id):'/rest/v1/evaluations';
+   const saved=await VLensAPI.request(evalPath,{method:previous?'PATCH':'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(previous?{communication:payload.communication,technical_knowledge:payload.technical_knowledge,problem_solving:payload.problem_solving,culture_fit:payload.culture_fit,overall_score:payload.overall_score,recommendation:payload.recommendation,notes:payload.notes}:payload)});
+   if(!Array.isArray(saved)||saved.length!==1||!saved[0].id)throw new Error('Evaluation write not confirmed');
    const dbStage=isAdvancing?'approval':d==='عدم الاستمرار'?'rejected':'interview';
-   await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({stage:dbStage})});
+   const updated=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({stage:dbStage})});
+   if(!Array.isArray(updated)||updated.length!==1||updated[0].stage!==dbStage)throw new Error('Application stage update not confirmed');
   }catch(e){
    console.warn('Backend evaluation save failed',e);
    toast.textContent='تعذر إكمال الحفظ في قاعدة البيانات؛ لم يتم تأكيد القرار. أعد المحاولة أو تحقق من سجل التقييمات.';
