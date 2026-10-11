@@ -64,6 +64,23 @@ function updateEvalSaveStatus(){
  el.textContent=live?(rec.draft_updated_at?'● تعديلات محلية لم تُحفظ في قاعدة البيانات':rec.backend_saved?'✓ التقييم محفوظ في قاعدة البيانات':'○ لم يتم تأكيد حفظ تقييم في قاعدة البيانات'):'وضع التجربة — الحفظ محلي فقط';
  el.style.color=live&&rec.draft_updated_at?'#b45309':live&&rec.backend_saved?'#15803d':'#64748b';
 }
+function hasUnsavedBackendEvaluation(){
+ const sel=document.getElementById('evalCandidate');
+ if(!sel||sel.dataset.backend!=='1'||!window.VLensAPI||!VLensAPI.isAuthenticated())return false;
+ const user=VLensAPI.userId();
+ if(!user)return false;
+ // Check every locally edited interview, not only the currently selected one.
+ return Array.from(sel.options).some(opt=>{
+  if(!opt.dataset.interview)return false;
+  const key='vlens_interview_draft_'+user+'_'+opt.dataset.interview;
+  try{return !!JSON.parse(localStorage.getItem(key)||'{}').draft_updated_at}catch(e){return false}
+ });
+}
+window.addEventListener('beforeunload',function(event){
+ if(!hasUnsavedBackendEvaluation())return;
+ event.preventDefault();
+ event.returnValue='';
+});
 function saveEvalNotes(){const rec=readEval();rec.notes=document.getElementById('evalNotes').value;rec.draft_updated_at=Date.now();localStorage.setItem(evalKey(),JSON.stringify(rec));updateEvalSaveStatus()}
 function rate(btn,n){const box=btn.parentElement;box.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i<n));document.getElementById(box.dataset.out).textContent=n+'/5';const rec=readEval();rec[box.dataset.out]=n;rec.draft_updated_at=Date.now();localStorage.setItem(evalKey(),JSON.stringify(rec));renderCombined();updateEvalSaveStatus()}
 async function saveDecision(d){
