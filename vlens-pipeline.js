@@ -4,7 +4,7 @@
     try{const a=JSON.parse(localStorage.getItem('vlens_demo_candidates')||'[]');return Array.isArray(a)?a.length:0}catch(e){return 0}
   }
   function ids(){
-    const out=Array.from({length:100},(_,i)=>String(i+1));
+    const out=Array.from({length:localStorage.getItem('vlens_demo_seed_mode')==='empty'?0:100},(_,i)=>String(i+1));
     try{const imported=JSON.parse(localStorage.getItem('vlens_demo_candidates')||'[]');if(Array.isArray(imported))imported.forEach((x,i)=>{const id=String(x&&x.id||'demo-'+(i+1));if(!out.includes(id))out.push(id)})}catch(e){}
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
