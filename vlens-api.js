@@ -34,7 +34,7 @@ window.VLensAPI = (() => {
   function consumeAuthCallback(){const p=new URLSearchParams(location.hash.slice(1));const access=p.get('access_token'),refresh=p.get('refresh_token'),type=p.get('type')||'';if(!access)return false;localStorage.setItem('vlens_access_token',access);if(refresh)localStorage.setItem('vlens_refresh_token',refresh);sessionStorage.setItem('vlens_demo','1');sessionStorage.setItem('vlens_auth_callback_type',type);history.replaceState(null,'',location.pathname);return true}
   async function bootstrapProfile(){return request('/rest/v1/rpc/bootstrap_admin',{method:'POST',body:'{}'})}
   async function updatePassword(password){if(!(await ensureSession()))throw new Error('Authentication required');if(!password||password.length<8)throw new Error('Password must be at least 8 characters');return request('/auth/v1/user',{method:'PUT',body:JSON.stringify({password})})}
-  async function signIn(email,password){
+  async function resetPassword(email){const res=await fetch(url+'/auth/v1/recover',{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({email,redirect_to:'https://mohanad7ii.github.io/v-lens-HR/auth-callback.html'})});if(!res.ok)throw new Error('Recovery request failed');return true}\n  async function signIn(email,password){
     const data=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
     localStorage.setItem('vlens_access_token',data.access_token);
     localStorage.setItem('vlens_refresh_token',data.refresh_token);
@@ -94,7 +94,7 @@ window.VLensAPI = (() => {
   const listOffers=()=>request('/rest/v1/offers?select=*&order=created_at.desc');
   const createInterview=async(interview)=>{const companyId=await requireCreateRole();const result=await request('/rest/v1/interviews',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...interview,company_id:companyId})});if(!Array.isArray(result)||result.length!==1||!result[0]?.id)throw new Error('لم تؤكد قاعدة البيانات إنشاء المقابلة');return result[0]};
   const createOffer=async(offer)=>{const companyId=await requireCreateRole();const result=await request('/rest/v1/offers',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...offer,company_id:companyId})});if(!Array.isArray(result)||result.length!==1||!result[0]?.id)throw new Error('لم تؤكد قاعدة البيانات إنشاء العرض الوظيفي');return result[0]};
-  return {signUp,signIn,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,createCandidate,listApplications,listInterviews,createInterview,listOffers,createOffer,request,userId,isAuthenticated:()=>tokenValid()};
+  return {signUp,signIn,resetPassword,updatePassword,signOut,consumeAuthCallback,bootstrapProfile,ensureSession,requireAuth,clearSession,uploadCV,createCandidateFromCV,parseCV,inviteTeamMember,calculateMatch,scoreApplication,getMyProfile,getPermissions,listJobs,createJob,listCandidates,createCandidate,listApplications,listInterviews,createInterview,listOffers,createOffer,request,userId,isAuthenticated:()=>tokenValid()};
 })();
 /* Shared demo pipeline state */
 window.VLensPipeline=(()=>{
