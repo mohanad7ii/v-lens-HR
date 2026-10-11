@@ -192,8 +192,14 @@ async function saveDecision(d){
    if(!Array.isArray(saved)||saved.length!==1||!saved[0].id)throw new Error('Evaluation write not confirmed');
    evaluationConfirmed=true;
    const dbStage=isAdvancing?'approval':d==='عدم الاستمرار'?'rejected':'interview';
-   const updated=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({stage:dbStage})});
-   if(!Array.isArray(updated)||updated.length!==1||updated[0].stage!==dbStage)throw new Error('Application stage update not confirmed');
+   const applicationRows=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId)+'&select=id,stage&limit=1');
+   if(!Array.isArray(applicationRows)||applicationRows.length!==1)throw new Error('Application unavailable or access denied');
+   const currentStage=applicationRows[0].stage;
+   if(currentStage!==dbStage){
+    if(currentStage!=='interview')throw new Error('Application stage conflict: '+currentStage);
+    const updated=await VLensAPI.request('/rest/v1/applications?id=eq.'+encodeURIComponent(appId)+'&stage=eq.'+encodeURIComponent(currentStage),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({stage:dbStage})});
+    if(!Array.isArray(updated)||updated.length!==1||updated[0].stage!==dbStage)throw new Error('Application stage changed during save');
+   }
   }catch(e){
    console.warn('Backend evaluation save failed',e);
    const raw=String(e&&e.message||e||'');
@@ -204,6 +210,7 @@ async function saveDecision(d){
    if(/401|JWT expired|Authentication required|invalid.*token/i.test(raw))message='انتهت جلسة الدخول أو تعذر التحقق منها. سجّل الدخول مجددًا ثم أعد حفظ القرار؛ تقييمك وملاحظاتك محفوظة محليًا.';
    else if(/403|42501|permission denied|row.level.security|policy/i.test(raw))message='لا تملك صلاحية حفظ هذا التقييم أو تحديث الطلب. تواصل مع مسؤول النظام؛ تقييمك وملاحظاتك محفوظة محليًا.';
    else if(/Missing selected interview|Active company profile required/i.test(raw))message='تعذر تحديد مقابلة حقيقية مرتبطة بحساب شركة نشط. حدّث الصفحة واختر المقابلة من جديد.';
+   else if(/Application stage conflict|Application stage changed during save/i.test(raw))message='تغيّرت مرحلة الطلب بواسطة عملية أخرى؛ لم نكتب فوقها. التقييم محفوظ لكن يلزم مراجعة مرحلة الطلب.';
    else if(/Evaluation write not confirmed|Application stage update not confirmed/i.test(raw))message='لم تؤكد قاعدة البيانات اكتمال جميع التحديثات. راجع سجل التقييمات قبل إعادة المحاولة لتجنب اختلاف حالة الطلب.';
    if(evaluationConfirmed)message='تم تأكيد حفظ التقييم في قاعدة البيانات، لكن لم يتأكد تحديث مرحلة طلب التوظيف. أعد محاولة حفظ القرار بعد التحقق من حالة الطلب. '+message;
    toast.textContent=message;updateEvalSaveStatus();
