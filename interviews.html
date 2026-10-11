@@ -100,12 +100,14 @@ async function restoreBackendEvaluation(){
  const key=evalKey(),user=VLensAPI.userId();
  if(!user)return;
  if(readEval().draft_updated_at&&!window.confirm('سيتم استبدال التعديلات المحلية بنسخة قاعدة البيانات. هل تريد المتابعة؟'))return;
+ const startingDraft=readEval().draft_updated_at||null;
  restoreBackendEvaluation.busy=true;
  if(button){button.disabled=true;button.textContent='جارٍ الاستعادة…';button.setAttribute('aria-busy','true')}
  toast.textContent='جارٍ استعادة التقييم من قاعدة البيانات…';
  try{
   const rows=await VLensAPI.request('/rest/v1/evaluations?interview_id=eq.'+encodeURIComponent(opt.dataset.interview)+'&evaluator_id=eq.'+encodeURIComponent(user)+'&select=communication,technical_knowledge,problem_solving,culture_fit,recommendation,notes&limit=1');
   if(evalKey()!==key)return;
+  if((readEval().draft_updated_at||null)!==startingDraft){toast.textContent='تم تعديل المسودة أثناء الاستعادة؛ لم تُستبدل تعديلاتك.';return}
   if(!Array.isArray(rows)||!rows[0]){toast.textContent='لا توجد نسخة محفوظة في قاعدة البيانات لهذه المقابلة.';return}
   const db=rows[0],rec={r1:db.problem_solving||0,r2:db.technical_knowledge||0,r3:db.communication||0,r4:db.culture_fit||0,notes:db.notes||'',decision:db.recommendation||'',backend_saved:true};
   localStorage.setItem(key,JSON.stringify(rec));paintCandidateEvaluation();
@@ -218,14 +220,14 @@ async function loadCandidateEvaluation(){
  paintCandidateEvaluation();
  const sel=document.getElementById('evalCandidate'),opt=sel&&sel.selectedOptions[0];
  if(!window.VLensAPI||!VLensAPI.isAuthenticated()||!sel||sel.dataset.backend!=='1'||!opt||!opt.dataset.interview)return;
- const interviewId=opt.dataset.interview,key=evalKey(),user=VLensAPI.userId();
+ const interviewId=opt.dataset.interview,key=evalKey(),user=VLensAPI.userId(),startedDraft=readEval().draft_updated_at||null;
  if(!user)return;
  try{
   const rows=await VLensAPI.request('/rest/v1/evaluations?interview_id=eq.'+encodeURIComponent(interviewId)+'&evaluator_id=eq.'+encodeURIComponent(user)+'&select=communication,technical_knowledge,problem_solving,culture_fit,recommendation,notes,created_at&limit=1');
   if(!rows||!rows[0]||evalKey()!==key)return;
   const local=readEval();
   // Keep a locally edited draft rather than overwriting unsaved changes.
-  if(local.draft_updated_at)return;
+  if(local.draft_updated_at||startedDraft!==null)return;
   const db=rows[0],rec={...local,r1:db.problem_solving||0,r2:db.technical_knowledge||0,r3:db.communication||0,r4:db.culture_fit||0,notes:db.notes||'',decision:db.recommendation||'',backend_saved:true};
   localStorage.setItem(key,JSON.stringify(rec));
   paintCandidateEvaluation();
