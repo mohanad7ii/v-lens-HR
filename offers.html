@@ -26,7 +26,7 @@ function openCreateOffer(){fillOfferCandidates();const d=new Date(),s=new Date(d
 function closeCreateOffer(){document.getElementById('createOfferModal').classList.remove('open')}
 
 function getLocalOffers(){const a=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('vlens_offer_'))continue;try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o)a.push(o)}catch(e){}}return a.sort((a,b)=>String(b.created||'').localeCompare(String(a.created||'')))}
-function getOffers(){const local=getLocalOffers();if(window.VLensAPI&&VLensAPI.isAuthenticated())return backendOffers;return local}
+function getOffers(){const local=getLocalOffers();if(sessionStorage.getItem('vlens_offline_demo')==='1')return local;if(window.VLensAPI&&VLensAPI.isAuthenticated())return backendOffers;return local}
 function statusOf(o){if(o.status==='sent'&&o.expiry&&new Date(o.expiry+'T23:59:59')<new Date())return'expired';if(o.status==='draft')return'pending_approval';if(o.status==='withdrawn')return'rejected_internal';return o.status||'pending_approval'}
 const statusLabels={pending_approval:'بانتظار الموافقة',approved:'معتمد داخلياً',sent:'بانتظار رد المرشح',accepted:'مقبول',rejected:'مرفوض من المرشح',rejected_internal:'غير معتمد',expired:'منتهي الصلاحية'};
 function money(n){return Number(n||0).toLocaleString('ar-SA')+' ر.س'}
