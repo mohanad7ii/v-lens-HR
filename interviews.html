@@ -351,4 +351,22 @@ function renderInterviewLive(){
  }
 }
 rememberInterviewSelection();renderInterviewLive();window.addEventListener('storage',function(){renderInterviewLive();renderMeetings()});window.addEventListener('vlens:pipeline',function(){renderInterviewLive();renderMeetings()});
-</script><script src="vlens-role-ui.js?v=20261009-19"></script><script src="vlens-i18n.js?v=20261009-5"></script></body></html>
+</script><script src="vlens-role-ui.js?v=20261009-19"></script><script src="vlens-i18n.js?v=20261009-5"></script><script>
+(function(){
+ const requested=new URLSearchParams(location.search).get('candidate');
+ if(!requested)return;
+ let attempts=0;
+ function focusRequested(){
+  const select=document.getElementById('evalCandidate');
+  if(!select)return;
+  const option=Array.from(select.options).find(o=>String(o.value).split('|')[0]===requested);
+  if(option){
+   if(select.value!==option.value){select.value=option.value;select.dispatchEvent(new Event('change',{bubbles:true}))}
+   select.scrollIntoView({behavior:'smooth',block:'center'});
+   return;
+  }
+  if(++attempts<15)setTimeout(focusRequested,500);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',focusRequested,{once:true});else focusRequested();
+})();
+</script></body></html>
