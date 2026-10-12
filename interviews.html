@@ -252,7 +252,7 @@ async function saveDecision(d){
  if(!authenticated){
   let status=isAdvancing?'offer':d==='عدم الاستمرار'?'rejected':'interview';
   if(window.VLensPipeline)VLensPipeline.set(cand.id,status,{source:'interview',interview_decision:d,interview_score:Number.isFinite(rec.interview_score)?rec.interview_score:null,final_score:Number.isFinite(rec.final_score)?rec.final_score:null});
-  else localStorage.setItem('vlens_candidate_status_'+cand.id,JSON.stringify({status,updated:rec.updated,source:'interview'}));
+  else localStorage.setItem('vlens_candidate_status_'+cand.id,JSON.stringify({status,updated:persisted.updated,source:'interview',interview_decision:d}));
   const ivs=demoInterviews(),iv=ivs.find(x=>String(x.candidate_id)===String(cand.id)&&x.status==='scheduled');
   if(iv){iv.status='completed';iv.completed_at=new Date().toISOString();localStorage.setItem('vlens_demo_interviews',JSON.stringify(ivs));renderMeetings()}
  }
