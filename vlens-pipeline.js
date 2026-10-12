@@ -26,7 +26,7 @@
     if(!id)throw new Error('Candidate ID is required');
     if(!VALID_STATUSES.has(status))throw new Error('Invalid candidate pipeline status: '+status);
     const previous=get(id)||{};
-    const shortlistFlag=status==='short'?true:status==='review'&&previous.status==='short'?false:(previous.shortlisted===true||previous.status==='short');const rec=Object.assign({},previous,meta||{},{status,shortlisted:shortlistFlag,updated:new Date().toLocaleString('ar-SA')});
+    const shortlistFlag=status==='short'?true:meta&&typeof meta.shortlisted==='boolean'?meta.shortlisted:status==='review'&&previous.status==='short'?false:(previous.shortlisted===true||previous.status==='short');const rec=Object.assign({},previous,meta||{},{status,shortlisted:shortlistFlag,updated:new Date().toLocaleString('ar-SA')});
     localStorage.setItem(PREFIX+id,JSON.stringify(rec));
     const job=(meta&&meta.job)||previous.job||localStorage.getItem('vlens_candidate_job_'+id);
     if(job){
