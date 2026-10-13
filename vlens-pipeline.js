@@ -25,7 +25,7 @@
     id=String(id||'').trim();
     if(!id)throw new Error('Candidate ID is required');
     if(!VALID_STATUSES.has(status))throw new Error('Invalid candidate pipeline status: '+status);
-    const previous=get(id)||{};
+    const previous=get(id)||{};if(previous.status==='hired'&&status!=='hired'&&!(meta&&meta.allow_reopen===true))throw new Error('Hired candidate cannot be moved back without explicit reopening');
     const shortlistFlag=status==='short'?true:meta&&typeof meta.shortlisted==='boolean'?meta.shortlisted:status==='review'&&previous.status==='short'?false:(previous.shortlisted===true||previous.status==='short');const rec=Object.assign({},previous,meta||{},{status,shortlisted:shortlistFlag,updated:new Date().toLocaleString('ar-SA'),updated_at:new Date().toISOString()});
     localStorage.setItem(PREFIX+id,JSON.stringify(rec));
     const job=(meta&&meta.job)||previous.job||localStorage.getItem('vlens_candidate_job_'+id);
