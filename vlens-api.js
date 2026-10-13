@@ -19,7 +19,7 @@ window.VLensAPI = (() => {
       'Content-Type': 'application/json'
     }, options.headers || {});
     const res = await fetch(url + path, Object.assign({}, options, {headers}));
-    if (res.status === 401 && (path.startsWith('/rest/') || path.startsWith('/storage/') || path.startsWith('/functions/'))) { if (token() === headers.Authorization.replace(/^Bearer /,'')) { clearSession(); throw new Error('انتهت صلاحية جلسة الدخول. سجّل الدخول مرة أخرى.'); } throw new Error('تغيّرت جلسة الدخول أثناء الطلب. أعد المحاولة.'); }
+    if (res.status === 401 && (path.startsWith('/rest/') || path.startsWith('/storage/') || path.startsWith('/functions/'))) { if (token() === headers.Authorization.replace(/^Bearer /,'') && token() !== '') { clearSession(); throw new Error('انتهت صلاحية جلسة الدخول. سجّل الدخول مرة أخرى.'); } throw new Error('تغيّرت جلسة الدخول أثناء الطلب. أعد المحاولة.'); }
     if (!res.ok) { const raw=await res.text(); let message=raw||('HTTP '+res.status); try { const payload=JSON.parse(raw); message=payload.msg||payload.message||payload.error_description||payload.error||message; } catch (_) {} throw new Error(message); }
     if (res.status === 204) return null;
     const text = await res.text();
