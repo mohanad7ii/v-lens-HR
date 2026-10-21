@@ -82,7 +82,7 @@ async function extractLocalCV(file){
  const clean=s=>s.replace(/\s+/g,' ').trim();
  const name=nameLine?clean(nameLine.replace(/^(?:full\s*name|name|الاسم(?:\s*الكامل)?)\s*[:：]\s*/i,'')):clean(lines.find(s=>s.length>5&&s.length<65&&!/resume|curriculum|vitae|cv|email|phone|@|\d{3}|profile|summary/i.test(s))||file.name.replace(/\.pdf$/i,''));
  const exp=years.length?Math.max(...years):fallbackYears.length?Math.max(...fallbackYears):0;
- const majorLabels=/(?:التخصص(?: الدراسي)?|التخصص الأكاديمي|major|field of study|specialization|degree in|bachelor(?:'s)? (?:degree )?in|بكالوريوس(?: في)?|ماجستير(?: في)?|دبلوم(?: في)?)\s*[:：\-]?\s*(.{3,90})/i;
+ const majorLabels=/(?:التخصص(?: الدراسي)?|التخصص الأكاديمي|major|field of study|specialization|degree in|bachelor(?:'s)? (?:degree )?in|bachelor of (?:science|arts|engineering|computer science)(?: degree)? in|(?:b\.?sc\.?|b\.?s\.?|b\.?a\.?)\s+in|بكالوريوس(?: في)?|ماجستير(?: في)?|دبلوم(?: في)?)\s*[:：\-]?\s*(.{3,90})/i;
  const majorMatch=lines.map(s=>s.match(majorLabels)).find(Boolean);
  const major=majorMatch?clean(majorMatch[1]).replace(/\s*[|•].*$/,'').slice(0,90):'غير مذكور';
  const headline=lines.find(s=>/engineer|developer|analyst|مهندس|محلل|أخصائي/i.test(s))||'غير محدد';
